@@ -38,6 +38,25 @@ let PostResolver = class PostResolver {
             return post;
         });
     }
+    updatePost(id, title, { em }) {
+        return __awaiter(this, void 0, void 0, function* () {
+            const post = yield em.findOne(Post_1.Post, { id });
+            if (!post) {
+                return null;
+            }
+            if (typeof title !== "undefined") {
+                post.title = title;
+                yield em.persistAndFlush(post);
+            }
+            return post;
+        });
+    }
+    deletePost(id, { em }) {
+        return __awaiter(this, void 0, void 0, function* () {
+            yield em.nativeDelete(Post_1.Post, { id });
+            return true;
+        });
+    }
 };
 __decorate([
     type_graphql_1.Query(() => [Post_1.Post]),
@@ -61,6 +80,23 @@ __decorate([
     __metadata("design:paramtypes", [String, Object]),
     __metadata("design:returntype", Promise)
 ], PostResolver.prototype, "createPost", null);
+__decorate([
+    type_graphql_1.Mutation(() => Post_1.Post, { nullable: true }),
+    __param(0, type_graphql_1.Arg("id")),
+    __param(1, type_graphql_1.Arg("title", () => String, { nullable: true })),
+    __param(2, type_graphql_1.Ctx()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Number, String, Object]),
+    __metadata("design:returntype", Promise)
+], PostResolver.prototype, "updatePost", null);
+__decorate([
+    type_graphql_1.Mutation(() => Boolean),
+    __param(0, type_graphql_1.Arg("id")),
+    __param(1, type_graphql_1.Ctx()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Number, Object]),
+    __metadata("design:returntype", Promise)
+], PostResolver.prototype, "deletePost", null);
 PostResolver = __decorate([
     type_graphql_1.Resolver()
 ], PostResolver);
