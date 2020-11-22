@@ -8,7 +8,7 @@ import { buildSchema } from "type-graphql";
 import { HelloResolver } from "./resolvers/hello";
 import { PostResolver } from "./resolvers/Post";
 import { UserResolver } from "./resolvers/User";
-
+import cors from "cors";
 import redis from "redis";
 import session from "express-session";
 import connectRedis from "connect-redis";
@@ -24,6 +24,7 @@ const main = async () => {
   // console.log(post);
 
   const app = express();
+  app.use(cors({ origin: "http://localhost:3000", credentials: true }));
   // app.get("/", (req, res) => {
   //   res.json("Hello");
   // });
@@ -59,7 +60,7 @@ const main = async () => {
     context: ({ req, res }) => ({ em: orm.em, req, res }),
   });
 
-  apolloServer.applyMiddleware({ app });
+  apolloServer.applyMiddleware({ app, cors: false });
 
   app.listen(8000, () => {
     console.log(`$on http://localhost:8000/graphql`);

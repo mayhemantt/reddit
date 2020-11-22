@@ -99,16 +99,26 @@ let UserResolver = class UserResolver {
                     ],
                 };
             }
+            let user;
             const hashedPassword = yield argon2_1.default.hash(options.password);
-            const user = em.create(User_1.User, {
-                username: options.username,
-                password: hashedPassword,
-            });
             try {
-                yield em.persistAndFlush(user);
+                const result = yield em
+                    .createQueryBuilder(User_1.User)
+                    .getKnexQuery()
+                    .insert({
+                    username: options.username,
+                    password: hashedPassword,
+                    created_at: new Date(),
+                    updated_at: new Date(),
+                })
+                    .returning("*");
+                user = result[0];
+                user.updatedAt = result[0].updated_at;
+                user.createdAt = result[0].created_at;
+                console.log(user, "userrrrrrrrrrrrrrr");
             }
             catch (err) {
-                if (err.code === "23505" || err.detail.includes("already exists")) {
+                if (err.code === "23505") {
                     return {
                         errors: [
                             {
@@ -182,7 +192,7 @@ __decorate([
     __metadata("design:returntype", Promise)
 ], UserResolver.prototype, "me", null);
 __decorate([
-    type_graphql_1.Mutation(() => User_1.User),
+    type_graphql_1.Mutation(() => UserResponse),
     __param(0, type_graphql_1.Arg("options")),
     __param(1, type_graphql_1.Ctx()),
     __metadata("design:type", Function),
