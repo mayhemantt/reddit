@@ -23,7 +23,7 @@ const hello_1 = require("./resolvers/hello");
 const Post_1 = require("./resolvers/Post");
 const User_1 = require("./resolvers/User");
 const cors_1 = __importDefault(require("cors"));
-const redis_1 = __importDefault(require("redis"));
+const ioredis_1 = __importDefault(require("ioredis"));
 const express_session_1 = __importDefault(require("express-session"));
 const connect_redis_1 = __importDefault(require("connect-redis"));
 const main = () => __awaiter(void 0, void 0, void 0, function* () {
@@ -32,11 +32,11 @@ const main = () => __awaiter(void 0, void 0, void 0, function* () {
     const app = express_1.default();
     app.use(cors_1.default({ origin: "http://localhost:3000", credentials: true }));
     const RedisStore = connect_redis_1.default(express_session_1.default);
-    const redisClient = redis_1.default.createClient();
+    const redis = new ioredis_1.default();
     app.use(express_session_1.default({
-        name: "qid",
+        name: constants_1.COOKIE_NAME,
         store: new RedisStore({
-            client: redisClient,
+            client: redis,
             disableTouch: true,
         }),
         cookie: {
@@ -55,15 +55,14 @@ const main = () => __awaiter(void 0, void 0, void 0, function* () {
             validate: false,
             skipCheck: false,
         }),
-        context: ({ req, res }) => ({ em: orm.em, req, res }),
+        context: ({ req, res }) => ({ em: orm.em, req, res, redis }),
     });
     apolloServer.applyMiddleware({ app, cors: false });
     app.listen(8000, () => {
-        console.log(`$on http://localhost:8000/graphql`);
+        console.log(`Up At http://localhost:8000/graphql`);
     });
 });
 main().catch((err) => {
-    console.error(err);
+    process.exit(err);
 });
-console.log("Hello World");
 //# sourceMappingURL=index.js.map

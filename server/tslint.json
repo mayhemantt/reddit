@@ -1,0 +1,25 @@
+{
+  "defaultSeverity": "error",
+  "extends": ["tslint:recommended"],
+  "jsRules": {},
+  "rules": {
+    "max-classes-per-file": true
+  },
+  "jsx-alignment": true,
+  "jsx-keys": true,
+  "no-unused-variable": true,
+  "no-use-before-declare": true,
+  "triple-equals": [true, "allow-null-check"],
+  "switch-default": true,
+  "no-duplicate-imports": [true, { "allow-namespace-imports": true }],
+  "binary-expression-operand-order": true,
+  "class-name": true,
+  "import-source-order": [
+    true,
+    {
+      "import-sources-order": "lowercase-last",
+      "named-imports-order": "lowercase-first"
+    }
+  ],
+  "radix": false
+}

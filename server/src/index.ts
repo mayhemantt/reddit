@@ -1,6 +1,6 @@
 import "reflect-metadata";
 import { MikroORM } from "@mikro-orm/core";
-import { __prod_ } from "./constants";
+import { __prod_, COOKIE_NAME } from "./constants";
 import microConfig from "./mikro-orm.config";
 import express from "express";
 import { ApolloServer } from "apollo-server-express";
@@ -9,9 +9,10 @@ import { HelloResolver } from "./resolvers/hello";
 import { PostResolver } from "./resolvers/Post";
 import { UserResolver } from "./resolvers/User";
 import cors from "cors";
-import redis from "redis";
+import Redis from "ioredis";
 import session from "express-session";
 import connectRedis from "connect-redis";
+// import { sendEmail } from "./utils/sendEmail";
 
 const main = async () => {
   const orm = await MikroORM.init(microConfig);
@@ -30,13 +31,12 @@ const main = async () => {
   // });
 
   const RedisStore = connectRedis(session);
-  const redisClient = redis.createClient();
-
+  const redis = new Redis();
   app.use(
     session({
-      name: "qid",
+      name: COOKIE_NAME,
       store: new RedisStore({
-        client: redisClient,
+        client: redis,
         disableTouch: true,
       }),
       cookie: {
@@ -57,18 +57,17 @@ const main = async () => {
       validate: false,
       skipCheck: false,
     }),
-    context: ({ req, res }) => ({ em: orm.em, req, res }),
+    context: ({ req, res }) => ({ em: orm.em, req, res, redis }),
   });
 
   apolloServer.applyMiddleware({ app, cors: false });
 
   app.listen(8000, () => {
-    console.log(`$on http://localhost:8000/graphql`);
+    // tslint:disable-next-line: no-console
+    console.log(`Up At http://localhost:8000/graphql`);
   });
 };
 
 main().catch((err) => {
-  console.error(err);
+  process.exit(err);
 });
-
-console.log("Hello World");
