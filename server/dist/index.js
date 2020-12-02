@@ -13,9 +13,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 require("reflect-metadata");
-const core_1 = require("@mikro-orm/core");
 const constants_1 = require("./constants");
-const mikro_orm_config_1 = __importDefault(require("./mikro-orm.config"));
 const express_1 = __importDefault(require("express"));
 const apollo_server_express_1 = require("apollo-server-express");
 const type_graphql_1 = require("type-graphql");
@@ -26,9 +24,20 @@ const cors_1 = __importDefault(require("cors"));
 const ioredis_1 = __importDefault(require("ioredis"));
 const express_session_1 = __importDefault(require("express-session"));
 const connect_redis_1 = __importDefault(require("connect-redis"));
+const typeorm_1 = require("typeorm");
+const User_2 = require("./entities/User");
+const Post_2 = require("./entities/Post");
 const main = () => __awaiter(void 0, void 0, void 0, function* () {
-    const orm = yield core_1.MikroORM.init(mikro_orm_config_1.default);
-    orm.getMigrator().up();
+    const connection = typeorm_1.createConnection({
+        type: "postgres",
+        database: "reddit2",
+        username: "hemant",
+        password: "ubuntu",
+        logging: true,
+        synchronize: true,
+        entities: [User_2.User, Post_2.Post],
+        cache: true,
+    });
     const app = express_1.default();
     app.use(cors_1.default({ origin: "http://localhost:3000", credentials: true }));
     const RedisStore = connect_redis_1.default(express_session_1.default);
@@ -55,7 +64,7 @@ const main = () => __awaiter(void 0, void 0, void 0, function* () {
             validate: false,
             skipCheck: false,
         }),
-        context: ({ req, res }) => ({ em: orm.em, req, res, redis }),
+        context: ({ req, res }) => ({ req, res, redis }),
     });
     apolloServer.applyMiddleware({ app, cors: false });
     app.listen(8000, () => {
@@ -63,6 +72,6 @@ const main = () => __awaiter(void 0, void 0, void 0, function* () {
     });
 });
 main().catch((err) => {
-    process.exit(err);
+    console.log(err);
 });
 //# sourceMappingURL=index.js.map
