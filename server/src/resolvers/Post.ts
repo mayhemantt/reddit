@@ -1,14 +1,17 @@
 import { Post } from "../entities/Post";
 import {
   Arg,
-  Args,
   Ctx,
   Field,
+  FieldResolver,
+  Info,
   InputType,
   Int,
   Mutation,
+  ObjectType,
   Query,
   Resolver,
+  Root,
   UseMiddleware,
 } from "type-graphql";
 import { MyContext } from "../types";
@@ -22,29 +25,78 @@ class PostInput {
   @Field()
   text: string;
 }
-@Resolver()
+
+@ObjectType()
+class PaginatedPosts {
+  @Field(() => [Post])
+  posts: Post[];
+
+  @Field()
+  hasMore: boolean;
+  @Field({ nullable: true })
+  count?: number;
+}
+
+@Resolver(Post)
 export class PostResolver {
-  @Query(() => [Post])
+  @FieldResolver(() => String)
+  textSnippet(@Root() root: Post) {
+    return root.text.slice(0, 50);
+  }
+
+  @Query(() => PaginatedPosts)
   async posts(
     @Arg("limit", () => Int) limit: number,
     @Arg("cursor", () => String, { nullable: true }) cursor: string | null
-  ): Promise<Post[]> {
+    // @Info() info: any
+  ): Promise<PaginatedPosts> {
     const realLimit = Math.min(50, limit);
-    const qb = getConnection()
-      .getRepository(Post)
-      .createQueryBuilder("p")
-      .orderBy('"createdAt"', "DESC")
-      .take(realLimit);
-    if (cursor) {
-      // tslint:disable-next-line: radix
-      qb.where('"createdAt" < :cursor', { cursor: new Date(parseInt(cursor)) });
-    }
-    return qb.getMany();
-  }
+    const realLimitPlusOne = realLimit + 1;
 
-  @Query(() => Post, { nullable: true })
-  post(@Arg("id") id: number): Promise<Post | undefined> {
-    return Post.findOne(id);
+    const replacements: any[] = [realLimitPlusOne];
+    if (cursor) {
+      replacements.push(new Date(parseInt(cursor)));
+    }
+
+    // here $1 means replacements[0] and $2 replacements[1]
+    const posts = await getConnection().query(
+      `
+      select p.*,
+      json_build_object(
+        'id', u.id,
+        'username', u.username,
+        'email', u.email
+      ) creator
+      from post p
+      inner join public.user u on u.id = p."creatorId"
+      ${cursor ? `where p."createdAt" < $2` : ""}
+      order by p."createdAt" DESC
+      limit $1
+    `,
+      replacements
+    );
+
+    // const qb = getConnection()
+    //   .getRepository(Post)
+    //   .createQueryBuilder("p")
+    //   .innerJoinAndSelect("p.creator", "u", 'u.id = p."creatorId"')
+    //   .orderBy('p."createdAt"', "DESC")
+    //   .take(realLimitPlusOne);
+
+    // if (cursor) {
+    //   // tslint:disable-next-line: radix
+    //   qb.where('p."createdAt" < :cursor', {
+    //     cursor: new Date(parseInt(cursor)),
+    //   });
+    // }
+    // const posts = await qb.getMany();
+
+    // console.log(posts);
+
+    return {
+      posts: posts.slice(0, realLimit),
+      hasMore: posts.length === realLimitPlusOne,
+    };
   }
 
   @Mutation(() => Post)
@@ -52,8 +104,7 @@ export class PostResolver {
   async createPost(
     @Arg("input") input: PostInput,
     @Ctx() { req }: MyContext
-  ): // @Arg("text") text: string
-  Promise<Post> {
+  ): Promise<Post> {
     return Post.create({
       ...input,
       creatorId: req.session.userId,

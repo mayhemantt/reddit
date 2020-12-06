@@ -14,6 +14,7 @@ import { createConnection } from "typeorm";
 import { User } from "./entities/User";
 import { Post } from "./entities/Post";
 // import { sendEmail } from "./utils/sendEmail";
+import path from "path";
 
 const main = async () => {
   const connection = createConnection({
@@ -23,9 +24,12 @@ const main = async () => {
     password: "ubuntu",
     logging: true,
     synchronize: true,
+    migrations: [path.join(__dirname, "./migrations/*")],
     entities: [User, Post],
     cache: true,
   });
+
+  (await connection).runMigrations();
 
   // await Post.delete({});
   // console.log("wiped out Post");

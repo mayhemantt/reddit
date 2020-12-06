@@ -27,6 +27,7 @@ const connect_redis_1 = __importDefault(require("connect-redis"));
 const typeorm_1 = require("typeorm");
 const User_2 = require("./entities/User");
 const Post_2 = require("./entities/Post");
+const path_1 = __importDefault(require("path"));
 const main = () => __awaiter(void 0, void 0, void 0, function* () {
     const connection = typeorm_1.createConnection({
         type: "postgres",
@@ -35,9 +36,11 @@ const main = () => __awaiter(void 0, void 0, void 0, function* () {
         password: "ubuntu",
         logging: true,
         synchronize: true,
+        migrations: [path_1.default.join(__dirname, "./migrations/*")],
         entities: [User_2.User, Post_2.Post],
         cache: true,
     });
+    (yield connection).runMigrations();
     const app = express_1.default();
     app.use(cors_1.default({ origin: "http://localhost:3000", credentials: true }));
     const RedisStore = connect_redis_1.default(express_session_1.default);
