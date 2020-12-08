@@ -32,7 +32,7 @@ export const NavBar: React.FC<NavBarProps> = ({}) => {
         <Box mr="2">{data.me.username}</Box>
         <Button
           onClick={() => logout()}
-          idLoading={logoutFetching}
+          isLoading={logoutFetching}
           variant="link">
           {" "}
           Logout

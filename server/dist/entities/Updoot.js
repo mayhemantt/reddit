@@ -10,7 +10,6 @@ var __metadata = (this && this.__metadata) || function (k, v) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.Updoot = void 0;
-const type_graphql_1 = require("type-graphql");
 const typeorm_1 = require("typeorm");
 const Post_1 = require("./Post");
 const User_1 = require("./User");
@@ -25,7 +24,7 @@ __decorate([
     __metadata("design:type", Number)
 ], Updoot.prototype, "userId", void 0);
 __decorate([
-    typeorm_1.ManyToOne(() => User_1.User),
+    typeorm_1.ManyToOne(() => User_1.User, (user) => user.updoots),
     __metadata("design:type", User_1.User)
 ], Updoot.prototype, "user", void 0);
 __decorate([
@@ -33,11 +32,10 @@ __decorate([
     __metadata("design:type", Number)
 ], Updoot.prototype, "postId", void 0);
 __decorate([
-    typeorm_1.ManyToOne(() => Post_1.Post),
+    typeorm_1.ManyToOne(() => Post_1.Post, (post) => post.updoots),
     __metadata("design:type", Post_1.Post)
 ], Updoot.prototype, "post", void 0);
 Updoot = __decorate([
-    type_graphql_1.ObjectType(),
     typeorm_1.Entity()
 ], Updoot);
 exports.Updoot = Updoot;

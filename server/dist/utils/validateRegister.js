@@ -2,7 +2,7 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.validateRegister = void 0;
 exports.validateRegister = (options) => {
-    if (!options.email.includes("@") && options.email.length <= 3) {
+    if (!options.email.includes("@") && options.email.length <= 1) {
         return [
             {
                 field: "email",
@@ -18,7 +18,7 @@ exports.validateRegister = (options) => {
             },
         ];
     }
-    if (options.username.length <= 3) {
+    if (options.username.length <= 1) {
         return [
             {
                 field: "username",
@@ -26,7 +26,7 @@ exports.validateRegister = (options) => {
             },
         ];
     }
-    if (options.password.length <= 3) {
+    if (options.password.length <= 1) {
         return [
             {
                 field: "password",

@@ -15,6 +15,7 @@ import {
 } from "../generated/graphql";
 import { betterUpdateQuery } from "./betterUpdateQuery";
 import Router from "next/router";
+import { CacheProvider } from "@emotion/react";
 
 const errorExchange: Exchange = ({ forward }) => (ops$) => {
   return pipe(
@@ -133,6 +134,15 @@ export const createUrqlClient = (ssrExchange: any) => ({
       },
       updates: {
         Mutation: {
+          createPost: (_result, args, cache, info) => {
+            const allFields = cache.inspectFields("Query");
+            const fieldInfos = allFields.filter(
+              (info) => info.fieldName === "posts"
+            );
+            fieldInfos.forEach((fi) => {
+              cache.invalidate("Query", "posts", fi.arguments || {});
+            });
+          },
           logout: (_result, {}, cache, {}) => {
             betterUpdateQuery<LogoutMutation, MeQuery>(
               cache,

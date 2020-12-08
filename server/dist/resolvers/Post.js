@@ -63,19 +63,37 @@ let PostResolver = class PostResolver {
     }
     vote(postId, value, { req }) {
         return __awaiter(this, void 0, void 0, function* () {
+            const { userId } = req.session;
             const isUpdoot = value !== -1;
             const realValue = isUpdoot ? 1 : -1;
-            const { userId } = req.session;
-            yield Updoot_1.Updoot.insert({
-                userId,
-                postId,
-                value: realValue,
-            });
-            yield typeorm_1.getConnection().query(`
-      update post p
-      set p.points= p.points + $1
-      where p.id= $2
-    `, [realValue, postId]);
+            const updoot = yield Updoot_1.Updoot.findOne({ where: { postId, userId } });
+            if (updoot && updoot.value !== realValue) {
+                yield typeorm_1.getConnection().transaction((tm) => __awaiter(this, void 0, void 0, function* () {
+                    yield tm.query(`
+            update updoot
+            set value= $1
+            where "postId" = $2 and  "userId" = $3
+          `, [realValue, postId, userId]);
+                    yield tm.query(`
+            update post
+            set points = points + $1
+            where id=$2
+          `, [2 * realValue, postId]);
+                }));
+            }
+            else if (!updoot) {
+                yield typeorm_1.getConnection().transaction((tm) => __awaiter(this, void 0, void 0, function* () {
+                    yield tm.query(`
+            insert into updoot ("userId", "postId", value)
+            values($1, $2,$3)
+          `, [userId, postId, realValue]);
+                    yield tm.query(`
+            update post
+            set points = points + $1
+            where id = $2
+          `, [realValue, postId]);
+                }));
+            }
             return true;
         });
     }
