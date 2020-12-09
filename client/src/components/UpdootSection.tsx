@@ -1,5 +1,5 @@
-import { ChevronUpIcon, ChevronDownIcon } from "@chakra-ui/icons";
-import { Flex, Text } from "@chakra-ui/react";
+import { ChevronDownIcon, ChevronUpIcon } from "@chakra-ui/icons";
+import { Flex, IconButton, Text } from "@chakra-ui/react";
 import React from "react";
 import { PostSnippetFragment, useVoteMutation } from "../generated/graphql";
 
@@ -12,26 +12,34 @@ export const UpdootSection: React.FC<UpdootSectionProps> = ({ post }) => {
   const [, vote] = useVoteMutation();
   return (
     <Flex direction="column" justifyContent="center" alignItems="center" mr={4}>
-      <ChevronUpIcon
-        onClick={() => {
-          vote({
+      <IconButton
+        colorScheme={post.voteStatus === 1 ? "green" : undefined}
+        onClick={async () => {
+          if (post.voteStatus === 1) {
+            return;
+          }
+          await vote({
             postId: post.id,
             value: 1,
           });
         }}
-        w={8}
-        h={8}
+        aria-label="updoot post"
+        icon={<ChevronUpIcon />}
       />
       <Text style={{ fontSize: "20px" }}>{post.points}</Text>
-      <ChevronDownIcon
-        onClick={() => {
-          vote({
+      <IconButton
+        onClick={async () => {
+          if (post.voteStatus === -1) {
+            return;
+          }
+          await vote({
             postId: post.id,
             value: -1,
           });
         }}
-        w={8}
-        h={8}
+        colorScheme={post.voteStatus === -1 ? "red" : undefined}
+        aria-label="downdoot post"
+        icon={<ChevronDownIcon />}
       />
     </Flex>
   );
