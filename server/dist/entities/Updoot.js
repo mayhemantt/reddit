@@ -32,7 +32,9 @@ __decorate([
     __metadata("design:type", Number)
 ], Updoot.prototype, "postId", void 0);
 __decorate([
-    typeorm_1.ManyToOne(() => Post_1.Post, (post) => post.updoots),
+    typeorm_1.ManyToOne(() => Post_1.Post, (post) => post.updoots, {
+        onDelete: "CASCADE",
+    }),
     __metadata("design:type", Post_1.Post)
 ], Updoot.prototype, "post", void 0);
 Updoot = __decorate([
