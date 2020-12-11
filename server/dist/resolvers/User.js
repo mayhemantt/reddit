@@ -209,8 +209,10 @@ let UserResolver = class UserResolver {
     }
     logout({ req, res }) {
         return new Promise((resolve) => req.session.destroy((err) => {
-            res.clearCookie(constants_1.COOKIE_NAME);
+            const cleared = res.clearCookie(constants_1.COOKIE_NAME);
+            console.log(cleared);
             if (err) {
+                console.log(err);
                 resolve(false);
                 return;
             }
