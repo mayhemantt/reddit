@@ -2,11 +2,30 @@ import { CSSReset, ThemeProvider } from "@chakra-ui/react";
 import theme from "../theme";
 import Head from "next/head";
 import { ApolloProvider, ApolloClient, InMemoryCache } from "@apollo/client";
+import { PaginatedPosts, PostsQuery } from "../generated/graphql";
 
 const client = new ApolloClient({
   uri: "http://localhost:8000/graphql",
   credentials: "include",
-  cache: new InMemoryCache(),
+  cache: new InMemoryCache({
+    typePolicies: {
+      Query: {
+        fields: {
+          posts: {
+            merge(
+              existing: PaginatedPosts | undefined,
+              incoming: PaginatedPosts
+            ): PaginatedPosts {
+              return {
+                ...incoming,
+                posts: [...(existing?.posts || []), ...incoming.posts],
+              };
+            },
+          },
+        },
+      },
+    },
+  }),
 });
 
 function MyApp({ Component, pageProps }) {
