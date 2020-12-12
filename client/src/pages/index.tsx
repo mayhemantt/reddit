@@ -1,22 +1,18 @@
-import { withUrqlClient } from "next-urql";
 import {
   Box,
   Button,
   Flex,
   Heading,
-  IconButton,
   Link,
   Stack,
   Text,
 } from "@chakra-ui/react";
-// import { NavBar } from "../components/NavBar";
-import { usePostsQuery, useDeletePostMutation } from "../generated/graphql";
-import { createUrqlClient } from "../utils/createUrqlclient";
 import NextLink from "next/link";
-import { Layout } from "../components/Layout";
 import { useState } from "react";
+import { EditDeletePostButtons } from "../components/EditDeletePostButtons";
+import { Layout } from "../components/Layout";
 import { UpdootSection } from "../components/UpdootSection";
-import { DeleteIcon } from "@chakra-ui/icons";
+import { usePostsQuery } from "../generated/graphql";
 
 const Index = () => {
   const [variables, setVariables] = useState({
@@ -24,17 +20,24 @@ const Index = () => {
     cursor: null as string | null,
   });
 
-  const [, deletePost] = useDeletePostMutation();
-  const [{ data, fetching }] = usePostsQuery({
+  const { data, error, loading } = usePostsQuery({
     variables,
   });
 
-  if (!fetching && !data) {
+  if (error) {
+    return (
+      <Layout>
+        <div>{error.stack}</div>
+      </Layout>
+    );
+  }
+
+  if (!loading && !data) {
     return <div>You got no Post for some reason</div>;
   }
   return (
     <Layout>
-      {!data && fetching ? (
+      {!data && loading ? (
         <div>Loading...</div>
       ) : (
         <Stack spacing={8}>
@@ -53,15 +56,13 @@ const Index = () => {
                     <Text flex={1} mt={4}>
                       {p.textSnippet} ...
                     </Text>
-                    <IconButton
-                      ml="auto"
-                      icon={<DeleteIcon />}
-                      aria-label="Delete Post"
-                      onClick={() => {
-                        deletePost({ id: p.id });
-                        console.log("delete");
-                      }}
-                    />
+
+                    <Box ml="auto">
+                      <EditDeletePostButtons
+                        id={p.id}
+                        creatorId={p.creator.id}
+                      />
+                    </Box>
                   </Flex>
                 </Box>
               </Flex>
@@ -78,7 +79,7 @@ const Index = () => {
                 cursor: data.posts.posts[data.posts.posts.length - 1].createdAt,
               })
             }
-            isLoading={fetching}
+            isLoading={loading}
             m={"auto"}
             my={8}>
             Load More
@@ -89,4 +90,4 @@ const Index = () => {
   );
 };
 
-export default withUrqlClient(createUrqlClient, { ssr: true })(Index);
+export default Index;

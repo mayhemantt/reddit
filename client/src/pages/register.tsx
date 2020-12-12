@@ -36,11 +36,7 @@ const Register: React.FC<registerProps> = ({}) => {
               type="username"
             />
             <Box mt={4}>
-              <InputField
-                name="email"
-                placeholder="Email"
-                label="Email"
-              />
+              <InputField name="email" placeholder="Email" label="Email" />
             </Box>
             <Box mt={4}>
               <InputField
@@ -64,4 +60,4 @@ const Register: React.FC<registerProps> = ({}) => {
   );
 };
 
-export default withUrqlClient(createUrqlClient, { ssr: false })(Register);
+export default Register;

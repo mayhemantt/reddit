@@ -16,6 +16,8 @@ import { Post } from "./entities/Post";
 // import { sendEmail } from "./utils/sendEmail";
 import path from "path";
 import { Updoot } from "./entities/Updoot";
+import { createUserLoader } from "./utils/createUserLoader";
+import { createUpdootLoader } from "./utils/createUpdootLoader";
 
 const main = async () => {
   const connection = createConnection({
@@ -72,7 +74,13 @@ const main = async () => {
       validate: false,
       skipCheck: false,
     }),
-    context: ({ req, res }) => ({ req, res, redis }),
+    context: ({ req, res }) => ({
+      req,
+      res,
+      redis,
+      userLoader: createUserLoader(),
+      updootLoader: createUpdootLoader(),
+    }),
   });
 
   apolloServer.applyMiddleware({ app, cors: false });
