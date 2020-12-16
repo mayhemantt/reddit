@@ -58,13 +58,13 @@ const main = async () => {
       }),
       cookie: {
         maxAge: 1000 * 60 * 60 * 24 * 365 * 10, // mili secs* sec * min * hours * year * 10
-        httpOnly: true,
-        secure: __prod_, // cookie work in https only
+        // httpOnly: true,
+        // secure: __prod_, // cookie work in https only
         sameSite: "lax",
       },
-      saveUninitialized: false,
+      // saveUninitialized: false,
       secret: "bills",
-      resave: false,
+      // resave: false,
     })
   );
 

@@ -59,13 +59,9 @@ const main = () => __awaiter(void 0, void 0, void 0, function* () {
         }),
         cookie: {
             maxAge: 1000 * 60 * 60 * 24 * 365 * 10,
-            httpOnly: true,
-            secure: constants_1.__prod_,
             sameSite: "lax",
         },
-        saveUninitialized: false,
         secret: "bills",
-        resave: false,
     }));
     const apolloServer = new apollo_server_express_1.ApolloServer({
         schema: yield type_graphql_1.buildSchema({

@@ -3,7 +3,6 @@ import { User } from "../entities/User";
 import { MyContext } from "../types";
 import {
   Arg,
-  Args,
   Ctx,
   Field,
   FieldResolver,
